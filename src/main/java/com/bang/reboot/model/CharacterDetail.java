@@ -106,4 +106,13 @@ public class CharacterDetail {
 		this.characterAndroid = characterAndroid;
 	}
 	
+	@Column(columnDefinition = "LONGTEXT")
+    private String characterSymbol;
+    public String getCharacterSymbol() {
+        return characterSymbol;
+    }
+	public void setCharacterSymbol(String characterSymbol) {
+		this.characterSymbol = characterSymbol;
+	}
+	
 }

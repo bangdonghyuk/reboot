@@ -583,7 +583,7 @@ public class homeController {
 			System.out.println(exception);
 		}
 		// 비동기 작업 완료 후 콜백 호출
-		callback.accept(response.toString());
+		callback.accept(CharacterSymbol(ocidText));
 	}
 
 	private void CharacterAndroidUpdate(String ocidText, CharacterDetail existingCharacter, Consumer<String> callback) {
@@ -610,6 +610,91 @@ public class homeController {
 			in.close();
 
 			existingCharacter.setCharacterAndroid(response.toString());
+			characterDataRepository.save(existingCharacter);
+		} catch (Exception exception) {
+			System.out.println(exception);
+		}
+		callback.accept(CharacterSymbol(ocidText));
+	}
+	
+	
+	public String CharacterSymbol(String ocid) {
+		StringBuffer response = new StringBuffer();
+		String ocidText = ocid;
+		try {
+			Optional<CharacterDetail> existingCharacter = characterDataRepository.findByOcid(ocidText);
+			if (existingCharacter.isPresent()) {
+				CharacterDetail characterData = existingCharacter.get();
+				CharacterSymbolUpdate(ocidText, characterData, responseData -> {
+					response.append(responseData);
+				});
+			} else {
+				CharacterSymbolSave(ocidText, responseData -> {
+					response.append(responseData);
+				});
+			}
+		} catch (Exception exception) {
+			System.out.println(exception);
+		}
+		return response.toString();
+	}
+	
+	private void CharacterSymbolSave(String ocidText, Consumer<String> callback) {
+		String inputLine = null;
+		StringBuffer response = new StringBuffer();
+		try {
+			// 데이터를 가져오는 API 호출 및 로직
+			String urlString = "https://open.api.nexon.com/maplestory/v1/character/symbol-equipment?ocid=" + ocidText + "&date="
+					+ yesterday;
+			URL url = new URL(urlString);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setRequestProperty("x-nxopen-api-key", API_KEY);
+			int responseCode = connection.getResponseCode();
+			BufferedReader in;
+			if (responseCode == 200) {
+				in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			} else {
+				in = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+			}
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+			CharacterDetail characterData = new CharacterDetail();
+			characterData.setCharacterSymbol(response.toString());
+			characterDataRepository.save(characterData);
+		} catch (Exception exception) {
+			System.out.println(exception);
+		}
+		// 비동기 작업 완료 후 콜백 호출
+		callback.accept(response.toString());
+	}
+
+	private void CharacterSymbolUpdate(String ocidText, CharacterDetail existingCharacter, Consumer<String> callback) {
+		String inputLine = null;
+		StringBuffer response = new StringBuffer();
+		try {
+			// 데이터를 가져오는 API 호출 및 로직
+			String urlString = "https://open.api.nexon.com/maplestory/v1/character/symbol-equipment?ocid=" + ocidText + "&date="
+					+ yesterday;
+			URL url = new URL(urlString);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setRequestProperty("x-nxopen-api-key", API_KEY);
+			int responseCode = connection.getResponseCode();
+			BufferedReader in;
+			if (responseCode == 200) {
+				in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			} else {
+				in = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+			}
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+
+			existingCharacter.setCharacterSymbol(response.toString());
 			characterDataRepository.save(existingCharacter);
 		} catch (Exception exception) {
 			System.out.println(exception);
